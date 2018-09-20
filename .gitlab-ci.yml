@@ -54,7 +54,7 @@ mutation-test:
       - reports/mutation/html/*
     expire_in: 1 day
 
-REGISTRY-dev:
+docker-dev:
   image: docker:stable
   stage: publish
   dependencies:
@@ -63,11 +63,11 @@ REGISTRY-dev:
     - master
   script:
     - VERSION=$(cat version.txt)
-    - echo "$REGISTRY_REGISTRY_PASS" | docker login --username=beaver --password-stdin $REGISTRY_URL
+    - echo "$REGISTRY_PASS" | docker login --username=lucasventurasc --password-stdin $REGISTRY_URL
     - docker build . --file $DOCKER_FILE -t $REGISTRY_REGISTRY/$DOCKER_IMAGE_NAME:$VERSION
     - docker push $REGISTRY_REGISTRY/$DOCKER_IMAGE_NAME:$VERSION
 
-REGISTRY-prod:
+docker-prod:
   image: docker:stable
   stage: publish
   dependencies:
@@ -76,7 +76,7 @@ REGISTRY-prod:
     - master
   script:
     - VERSION=$(cat version.txt)
-    - echo "$REGISTRY_REGISTRY_PASS" | docker login --username=beaver --password-stdin $REGISTRY_URL
+    - echo "$REGISTRY_PASS" | docker login --username=lucasventurasc --password-stdin $REGISTRY_URL
     - docker build . --file $DOCKER_FILE -t $REGISTRY_PROD/$DOCKER_IMAGE_NAME:$VERSION
     - docker push $REGISTRY_PROD/$DOCKER_IMAGE_NAME:$VERSION
 

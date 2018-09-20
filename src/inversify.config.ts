@@ -40,8 +40,8 @@ kernel.bind<DataAnalyzer>("dataAnalyzer").toDynamicValue(() => {
 kernel.bind<EndpointsDataScanner>("scannerForBaseline").toDynamicValue(() => {
     let baselineRepository = kernel.get<ScannerRepository>('baselineRepository');
     let endpointsRepository = kernel.get<ManualClientEndpointsLoader>('endpointsRepository');
-    let restClient = kernel.get<DefaultRestClient>('restClient');
-    return new EndpointsDataScanner(endpointsRepository, restClient, baselineRepository);
+    let theRestClient = kernel.get<DefaultRestClient>('restClient');
+    return new EndpointsDataScanner(endpointsRepository, theRestClient, baselineRepository);
 });
 
 kernel.bind<EndpointsDataScanner>("scannerForCurrent").toDynamicValue(() => {

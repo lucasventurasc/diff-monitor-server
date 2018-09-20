@@ -1,0 +1,27 @@
+version: "3.6"
+
+networks:
+  net:
+    driver: overlay
+    attachable: true
+
+services:
+  diffmonitor:
+    image: diff-monitor-server
+    volumes:
+      - ${STACK_VOLUME}/diffmonitor/data/:/data/
+    command: node /server/build/Application.js
+    environment:
+      - OUTPUT_FOLDER=/data/
+      - PORT=6050
+    ports:
+      - 6050:6050
+    networks:
+      - net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 99M
+        reservations:
+          memory: 25M

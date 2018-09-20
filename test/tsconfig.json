@@ -1,0 +1,14 @@
+{
+  "extends" : "../tsconfig.json",
+  "include": [
+    "../src/**/*",
+    "../test/**/*",
+    "node_modules/@types/node/index.d.ts",
+    "node_modules/@types/mocha/index.d.ts",
+    "node_modules/@types/chai/index.d.ts",
+    "node_modules/@types/chai-as-promised/index.d.ts"
+  ],
+  "exclude": [
+    "../src/Application.ts"
+  ]
+}

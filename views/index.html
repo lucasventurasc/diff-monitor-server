@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Greepiece</title>
+    <script src="https://code.jquery.com/jquery-2.1.1.js"></script>
+    <style>
+        button {
+            width:400px;
+            height: 100px;
+            font-size: 15px;
+        }
+
+        html, body {
+            background: #EEE;
+            font: 12px sans-serif;
+            overflow-y:hidden;
+        }
+        body {
+            padding-top: 1.8em;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        html, body, table, tbody, tr, td {
+            height: 100%
+        }
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        td {
+            width: 33%;
+            padding: 3px 4px;
+            border: 1px solid transparent;
+            vertical-align: top;
+            font: 1em monospace;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+        h1 {
+            display: inline;
+            font-size: 100%;
+        }
+        del {
+            text-decoration: none;
+            color: #b30000;
+            background: #fadad7;
+        }
+        ins {
+            background: #eaf2c2;
+            color: #406619;
+            text-decoration: none;
+        }
+
+        #settings label {
+            margin-left: 1em;
+        }
+
+        [contentEditable] {
+            background: #333333;
+            border-color: #BBB #D9D9D9 #DDD;
+            border-radius: 4px;
+            outline: none;
+            color: white;
+
+        }
+        [contentEditable]:focus {
+            background: #303030;
+            border-color: #6699cc;
+            box-shadow: 0 0 4px #2175c9;
+        }
+
+        @-moz-document url-prefix() {
+            body {
+                height: 99%; /* Hide scroll bar in Firefox */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    Server: <span id="server"></span>
+    <center>
+        <table width="100%">
+            <tr>
+                <td style="width:200px;">
+                    <button onclick="scan()">Scan</button>
+                    <span id="scanStatus"></span>
+                    <br>
+                    <br>
+                    <button onclick="resetBaseline()">Reset Baseline</button>
+                    <span id="resetStatus"></span>
+                    <br>
+                    <br>
+                    <button onclick="analysis()">Analysis</button>
+                    <br>
+                    <br>
+                    <button onclick="initialize()">Initialize (erase everything)</button>
+                    <span id="initializeStatus"></span>
+                </td>
+                <td width="*" contenteditable="false" >
+                    <div style="position:relative;overflow-y:scroll;height:700px" id="logContent">
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+    </center>
+</body>
+</html>
+<script>
+
+    var url;
+    $(function() {
+        url = "<%=url%>";
+        if (url.indexOf("http") === -1) {
+            url = "http://" + url;
+        }
+        document.getElementById('server').innerHTML = url;
+        readLogs();
+    });
+
+    function readLogs() {
+        setInterval(function() {
+            $.ajax({
+                type: "GET",
+                url: url + "/log",
+                success: function(data, textStatus, xhr) {
+                    if(data.trim()) {
+                        document.getElementById('logContent').innerHTML += '<br>' + data;
+                        $("#logContent").scrollTop($("#logContent")[0].scrollHeight);
+                    }
+                }
+            });
+        }, 50)
+    }
+
+    function scan() {
+        $.ajax({
+            type: "GET",
+            url: url + "/scan",
+            success: function(data, textStatus, xhr) {
+                document.getElementById('scanStatus').innerHTML += textStatus;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown)
+            }
+        });
+
+    }
+
+    function resetBaseline() {
+        $.ajax({
+            type: "GET",
+            url: url + "/reset-baseline",
+            success: function(data, textStatus, xhr) {
+                document.getElementById('resetStatus').innerHTML += textStatus;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown)
+            }
+        });
+    }
+
+    function initialize() {
+        $.ajax({
+            type: "GET",
+            url: url + "/initialize",
+            success: function(data, textStatus, xhr) {
+                document.getElementById('initializeStatus').appendChild(textStatus);
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown)
+            }
+        });
+    }
+
+    function analysis() {
+        window.location = url + "/analysis/";
+    }
+
+</script>

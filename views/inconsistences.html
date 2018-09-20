@@ -1,0 +1,24 @@
+<pre id="display"></pre>
+<script>
+    let display = document.getElementById('display');
+    let fragment = document.createDocumentFragment();
+    let diffString = "<%=diff%>";
+    diffString = diffString.replace(new RegExp('&#34;', 'g'), '\"');
+    diffString = diffString.replace(new RegExp('\n', 'g'), '\\n');
+
+
+    let diff = JSON.parse(diffString);
+    diff.forEach(function (part) {
+        // green for additions, red for deletions
+        // grey for common parts
+        let color = part.added ? 'green' :
+            part.removed ? 'red' : 'grey';
+        let span = document.createElement('span');
+        span.style.color = color;
+        span.appendChild(document
+            .createTextNode(part.value));
+        fragment.appendChild(span);
+    });
+
+    display.appendChild(fragment);
+</script>

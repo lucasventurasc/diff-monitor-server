@@ -1,0 +1,83 @@
+image: lucasventurasc/node-with-git:8.11.4-alpine
+
+variables:
+  DOCKER_FILE: run/Dockerfile
+  DOCKER_IMAGE_NAME: diff-monitor-server
+  REGISTRY_URL: ""
+  REGISTRY_ENVIRONMENT_DEV: lucasventurasc
+  REGISTRY_ENVIRONMENT_PROD: lucasventurasc
+  REGISTRY_REGISTRY: $REGISTRY_URL/$REGISTRY_ENVIRONMENT_DEV
+  REGISTRY_PROD: $REGISTRY_URL/$REGISTRY_ENVIRONMENT_PROD
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - node_modules/
+
+stages:
+  - build
+  - test
+  - publish
+
+build:
+  stage: build
+  script:
+    - npm install .
+    - ./node_modules/.bin/tsc
+    - echo $(node -p "require('./package.json').version") > version.txt
+  artifacts:
+    paths:
+      - node_modules/*
+      - build/*
+      - version.txt
+    expire_in: 1 day
+
+unit-test:
+  stage: test
+  script:
+    - npm install -g nyc
+    - npm test
+  artifacts:
+    paths:
+      - coverage/*
+    expire_in: 1 day
+
+mutation-test:
+  stage: test
+  dependencies:
+    - build
+  script:
+    - npm install -g stryker-cli
+    - stryker run
+  artifacts:
+    paths:
+      - reports/mutation/html/*
+    expire_in: 1 day
+
+REGISTRY-dev:
+  image: docker:stable
+  stage: publish
+  dependencies:
+    - build
+  except:
+    - master
+  script:
+    - VERSION=$(cat version.txt)
+    - echo "$REGISTRY_REGISTRY_PASS" | docker login --username=beaver --password-stdin $REGISTRY_URL
+    - docker build . --file $DOCKER_FILE -t $REGISTRY_REGISTRY/$DOCKER_IMAGE_NAME:$VERSION
+    - docker push $REGISTRY_REGISTRY/$DOCKER_IMAGE_NAME:$VERSION
+
+REGISTRY-prod:
+  image: docker:stable
+  stage: publish
+  dependencies:
+    - build
+  only:
+    - master
+  script:
+    - VERSION=$(cat version.txt)
+    - echo "$REGISTRY_REGISTRY_PASS" | docker login --username=beaver --password-stdin $REGISTRY_URL
+    - docker build . --file $DOCKER_FILE -t $REGISTRY_PROD/$DOCKER_IMAGE_NAME:$VERSION
+    - docker push $REGISTRY_PROD/$DOCKER_IMAGE_NAME:$VERSION
+
+

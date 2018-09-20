@@ -1,0 +1,11 @@
+.idea/
+node_modules/
+coverage/
+npm-debug.log
+reports/
+dist/
+.tscache/
+build/
+.stryker-tmp/
+.nyc_output/*
+*.iml
